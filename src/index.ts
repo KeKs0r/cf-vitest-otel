@@ -1,3 +1,4 @@
+import { instrument, type ResolveConfigFn } from '@microlabs/otel-cf-workers';
 /**
  * Welcome to Cloudflare Workers! This is your first worker.
  *
@@ -11,8 +12,20 @@
  * Learn more at https://developers.cloudflare.com/workers/
  */
 
-export default {
-	async fetch(request, env, ctx): Promise<Response> {
-		return new Response('Hello World!');
-	},
-} satisfies ExportedHandler<Env>;
+const config: ResolveConfigFn = (env: Env, _trigger) => {
+	return {
+		exporter: {
+			url: 'https://typedwebhook.tools/webhook/d3be1cb0-9a7b-4007-87ea-643778507e48',
+		},
+		service: { name: 'cf-otel-vitest' },
+	};
+};
+
+export default instrument(
+	{
+		async fetch(request, env, ctx): Promise<Response> {
+			return new Response('Hello World!');
+		},
+	} satisfies ExportedHandler<Env>,
+	config,
+);
